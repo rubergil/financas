@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f0f4f8">
+<title>Finanças Pessoais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#e8eef5;--border:#dce4ed;
+  --text:#1a2332;--text2:#5a6a7e;--text3:#9aaabb;
+  --green:#0d9966;--green-bg:#e6f7f1;
+  --red:#e03040;--red-bg:#fde8ea;
+  --yellow:#c17d10;--yellow-bg:#fef3e0;
+  --blue:#1a6ef5;--blue-bg:#e8f0fe;
+  --purple:#7c3aed;--purple-bg:#f0ebff;
+  --r:12px;--rl:18px;
+  --sh:0 4px 20px rgba(26,35,50,.10);
+  --font:'Plus Jakarta Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html{font-size:15px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button,input,select{font-family:var(--font)}
+select option{background:#fff;color:var(--text)}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:64px;background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:200;box-shadow:0 -4px 20px rgba(26,35,50,.08)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;color:var(--text3);font-size:.62rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;padding-bottom:4px;cursor:pointer}
+.nav-item.active{color:var(--blue)}
+.nav-item svg{width:22px;height:22px;stroke-width:1.8}
+
+.main{padding-bottom:80px;min-height:100vh}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 18px 12px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(26,35,50,.07)}
+.topbar-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.topbar-title{font-size:1.1rem;font-weight:800;letter-spacing:-.02em}
+.mes-pill{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:99px;padding:6px 12px;font-size:.78rem;font-weight:600;color:var(--text2)}
+.mes-pill select{background:none;border:none;outline:none;font-family:var(--font);font-size:.78rem;font-weight:600;color:var(--text2);cursor:pointer;-webkit-appearance:none;appearance:none}
+
+.page{display:none;padding:16px 16px 0;animation:fadeUp .2s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.fab{position:fixed;bottom:76px;right:18px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:1.6rem;line-height:1;box-shadow:0 4px 16px rgba(26,110,245,.4);display:flex;align-items:center;justify-content:center;z-index:150;transition:all .15s;cursor:pointer}
+.fab:active{transform:scale(.93)}
+
+.saldo-hero{background:linear-gradient(135deg,#1a6ef5,#0d4fcf);border-radius:var(--rl);padding:22px 20px 20px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden}
+.saldo-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)}
+.saldo-label{font-size:.72rem;font-weight:600;opacity:.75;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.saldo-valor{font-family:var(--mono);font-size:2rem;font-weight:500;letter-spacing:-.02em;margin-bottom:14px}
+.saldo-row{display:flex;gap:10px}
+.saldo-mini{flex:1;background:rgba(255,255,255,.12);border-radius:10px;padding:10px 12px}
+.saldo-mini-label{font-size:.65rem;opacity:.75;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.saldo-mini-val{font-family:var(--mono);font-size:.9rem;font-weight:500}
+
+.sec-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:18px 0 10px}
+
+.alertas-wrap{margin-bottom:4px}
+.alerta-item{display:flex;align-items:center;gap:10px;background:var(--yellow-bg);border:1px solid #f0c060;border-radius:var(--r);padding:10px 14px;font-size:.8rem;font-weight:500;color:var(--yellow);margin-bottom:8px}
+
+.invest-card{background:linear-gradient(135deg,var(--purple-bg),#e8e0ff);border:1px solid #c4b5fd;border-radius:var(--r);padding:14px 16px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.invest-label{font-size:.72rem;font-weight:700;color:var(--purple);letter-spacing:.06em;text-transform:uppercase}
+.invest-val{font-family:var(--mono);font-size:1rem;font-weight:500;color:var(--purple)}
+
+.cartoes-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.cartoes-scroll::-webkit-scrollbar{display:none}
+.cartao-chip{flex-shrink:0;width:200px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;box-shadow:0 1px 4px rgba(26,35,50,.07)}
+.cartao-chip-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cartao-chip-nome{font-size:.88rem;font-weight:700}
+.status-pill{font-size:.6rem;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:99px;text-transform:uppercase}
+.s-USAR{background:var(--green-bg);color:var(--green)}
+.s-MODERADO{background:var(--yellow-bg);color:var(--yellow)}
+.s-EVITAR{background:var(--red-bg);color:var(--red)}
+.cartao-bar-wrap{height:4px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.cartao-bar-fill{height:100%;border-radius:99px;transition:width .4s}
+.b-USAR{background:var(--green)}.b-MODERADO{background:var(--yellow)}.b-EVITAR{background:var(--red)}
+.cartao-chip-vals{font-size:.72rem;color:var(--text2);display:flex;justify-content:space-between}
+.cartao-chip-vals strong{color:var(--text);font-family:var(--mono);font-size:.75rem}
+
+.cat-list{display:flex;flex-direction:column;gap:6px}
+.cat-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(26,35,50,.07)}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-nome{flex:1;font-size:.85rem;font-weight:500}
+.cat-bar-wrap{width:70px;height:4px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.cat-bar-fill{height:100%;background:var(--blue);border-radius:99px;transition:width .4s}
+.cat-valor{font-family:var(--mono);font-size:.78rem;color:var(--text2);min-width:80px;text-align:right}
+
+.filtros-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filtro-sel{flex:1;min-width:130px;background:var(--bg2);border:1px solid var(--border);border-radius:99px;padding:8px 14px;font-family:var(--font);font-size:.78rem;font-weight:500;color:var(--text);outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a6a7e'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:28px}
+.trans-group-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:14px 0 8px}
+.trans-list{display:flex;flex-direction:column;gap:5px}
+.trans-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(26,35,50,.07)}
+.trans-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.ti-rec{background:var(--green-bg);color:var(--green)}.ti-desp{background:var(--red-bg);color:var(--red)}
+.trans-info{flex:1;min-width:0}
+.trans-desc{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trans-meta{font-size:.7rem;color:var(--text2);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.trans-val{font-family:var(--mono);font-size:.88rem;font-weight:500;flex-shrink:0}
+.tv-rec{color:var(--green)}.tv-desp{color:var(--red)}
+.trans-del{background:none;border:none;color:var(--text3);font-size:1rem;padding:6px 8px;border-radius:6px;transition:all .12s;flex-shrink:0;cursor:pointer}
+.trans-del:active{color:var(--red);background:var(--red-bg)}
+
+.cartoes-grid{display:flex;flex-direction:column;gap:10px}
+.cartao-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:18px;box-shadow:0 1px 4px rgba(26,35,50,.07)}
+.cartao-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.cartao-card-nome{font-size:1rem;font-weight:700}
+.cartao-card-actions{display:flex;gap:6px}
+.btn-icon{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.78rem;color:var(--text2);cursor:pointer;transition:all .12s}
+.cartao-card-info{font-size:.8rem;color:var(--text2);margin-bottom:4px}
+.cartao-card-info strong{color:var(--text);font-family:var(--mono)}
+.btn-add-cartao{width:100%;background:var(--bg2);border:1.5px dashed var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--font);font-size:.85rem;font-weight:600;padding:14px;cursor:pointer;margin-top:4px;transition:all .15s}
+.btn-add-cartao:active{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+.modal-back{display:none;position:fixed;inset:0;background:rgba(26,35,50,.45);z-index:400;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.modal-back.show{display:flex}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 18px 32px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(26,35,50,.14);animation:slideUp .25s cubic-bezier(.2,.8,.3,1);max-height:92vh;overflow-y:auto}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 18px}
+.modal-title{font-size:1rem;font-weight:800;margin-bottom:16px}
+
+.tipo-tabs{display:flex;gap:6px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:16px}
+.tipo-tab{flex:1;border:none;border-radius:7px;font-family:var(--font);font-size:.82rem;font-weight:600;padding:9px;color:var(--text2);background:none;transition:all .15s;cursor:pointer}
+.tipo-tab.active{background:var(--bg2);color:var(--blue);box-shadow:0 1px 4px rgba(26,35,50,.07)}
+
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.form-input,.form-select{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:.9rem;padding:11px 14px;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.form-input:focus,.form-select:focus{border-color:var(--blue);background:var(--blue-bg)}
+.form-input::placeholder{color:var(--text3)}
+
+.sugest-badge{margin-top:6px;background:var(--blue-bg);border:1px solid rgba(26,110,245,.25);border-radius:99px;padding:4px 12px;font-size:.72rem;font-weight:600;color:var(--blue);cursor:pointer;display:none;align-items:center;gap:5px;width:fit-content}
+
+.btn-salvar{width:100%;background:var(--blue);color:#fff;border:none;border-radius:12px;font-family:var(--font);font-size:.9rem;font-weight:700;padding:14px;margin-top:6px;cursor:pointer;letter-spacing:.01em;transition:all .15s}
+.btn-salvar:active{background:#1450c4;transform:scale(.99)}
+
+.backup-bar{display:flex;gap:8px;margin-bottom:16px}
+.btn-backup{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px;font-family:var(--font);font-size:.78rem;font-weight:600;color:var(--text2);cursor:pointer;transition:all .12s}
+.btn-backup:active{background:var(--bg3)}
+
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--text);color:#fff;border-radius:99px;padding:10px 20px;font-size:.82rem;font-weight:600;box-shadow:var(--sh);z-index:600;opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.empty{text-align:center;padding:44px 20px;color:var(--text2)}
+.empty-icon{font-size:2.4rem;margin-bottom:10px;opacity:.35}
+.empty-txt{font-size:.85rem}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+</style>
+</head>
+<body>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" data-page="dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    Dashboard
+  </button>
+  <button class="nav-item" data-page="historico">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+    Histórico
+  </button>
+  <button class="nav-item" data-page="cartoes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    Cartões
+  </button>
+  <button class="nav-item" data-page="config">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    Config
+  </button>
+</nav>
+
+<button class="fab" id="fab">+</button>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-row">
+      <span class="topbar-title" id="topbarTitle">Dashboard</span>
+      <div class="mes-pill">📅 <select id="mesSel"></select></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="saldo-hero">
+      <div class="saldo-label">Saldo Disponível</div>
+      <div class="saldo-valor" id="heroSaldo">R$ 0,00</div>
+      <div class="saldo-row">
+        <div class="saldo-mini"><div class="saldo-mini-label">Receitas</div><div class="saldo-mini-val" id="heroRec">R$ 0,00</div></div>
+        <div class="saldo-mini"><div class="saldo-mini-label">Despesas</div><div class="saldo-mini-val" id="heroDesp">R$ 0,00</div></div>
+      </div>
+    </div>
+    <div id="alertasWrap" class="alertas-wrap"></div>
+    <div id="investCard" style="display:none" class="invest-card">
+      <div><div class="invest-label">Investimentos</div><div style="font-size:.72rem;color:var(--purple);margin-top:2px">Separado do saldo</div></div>
+      <div class="invest-val" id="heroInvest">R$ 0,00</div>
+    </div>
+    <div class="sec-label">Cartões</div>
+    <div class="cartoes-scroll" id="cartoesDash"></div>
+    <div class="sec-label">Gastos por Categoria</div>
+    <div class="cat-list" id="catList"></div>
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- HISTÓRICO -->
+  <div class="page" id="page-historico">
+    <div class="filtros-bar">
+      <select class="filtro-sel" id="filtCat">
+        <option value="">Todas as categorias</option>
+        <option>Moradia</option><option>Alimentação</option><option>Transporte</option>
+        <option>Saúde</option><option>Serviços domésticos</option><option>Lazer</option>
+        <option>Compras pessoais</option><option>Apoio familiar</option>
+        <option>Investimentos</option><option>Transferência interna</option>
+      </select>
+      <select class="filtro-sel" id="filtForma">
+        <option value="">Todas as formas</option>
+        <option>Nubank</option><option>C6</option><option>BRB</option>
+        <option>Débito/Pix</option><option>Dinheiro</option>
+      </select>
+    </div>
+    <div id="transWrap"></div>
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- CARTÕES -->
+  <div class="page" id="page-cartoes">
+    <div class="cartoes-grid" id="cartoesGrid"></div>
+    <button class="btn-add-cartao" id="btnAddCartao">+ Novo Cartão</button>
+    <div style="height:16px"></div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="page" id="page-config">
+    <div class="sec-label">Backup dos Dados</div>
+    <div class="backup-bar">
+      <button class="btn-backup" id="btnExport">⬇️ Exportar backup</button>
+      <button class="btn-backup" id="btnImport">⬆️ Importar backup</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <div class="sec-label" style="margin-top:20px">Sobre</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:.82rem;color:var(--text2);line-height:1.7">
+      <p><strong style="color:var(--text)">Finanças Pessoais</strong> — versão offline</p>
+      <p style="margin-top:6px">Dados salvos neste aparelho. Faça backup regularmente.</p>
+      <p style="margin-top:10px;font-size:.75rem;color:var(--text3)">💡 Adicione à tela inicial para usar como app.</p>
+    </div>
+    <div class="sec-label" style="margin-top:20px;color:var(--red)">Zona de Perigo</div>
+    <button id="btnLimpar" style="width:100%;background:var(--red-bg);border:1.5px solid var(--red);border-radius:var(--r);color:var(--red);font-family:var(--font);font-size:.85rem;font-weight:700;padding:13px;cursor:pointer">
+      🗑 Apagar TODOS os dados
+    </button>
+    <div style="height:20px"></div>
+  </div>
+</main>
+
+<!-- MODAL LANÇAMENTO -->
+<div class="modal-back" id="modalLanc">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Novo Lançamento</div>
+    <div class="tipo-tabs">
+      <button class="tipo-tab active" data-tipo="despesa">💸 Despesa</button>
+      <button class="tipo-tab" data-tipo="receita">💰 Receita</button>
+    </div>
+    <div class="form-group"><label class="form-label">Data</label><input type="date" id="fData" class="form-input"></div>
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" id="fDesc" class="form-input" placeholder="Ex: Supermercado Extra" autocomplete="off">
+      <div class="sugest-badge" id="sugestBadge"></div>
+    </div>
+    <div class="form-group" id="grpCat"><label class="form-label">Categoria</label>
+      <select id="fCat" class="form-select">
+        <option>Moradia</option><option>Alimentação</option><option>Transporte</option>
+        <option>Saúde</option><option>Serviços domésticos</option><option>Lazer</option>
+        <option>Compras pessoais</option><option>Apoio familiar</option>
+        <option>Investimentos</option><option>Transferência interna</option>
+      </select>
+    </div>
+    <div class="form-group" id="grpForma"><label class="form-label">Forma de Pagamento</label>
+      <select id="fForma" class="form-select">
+        <option>Nubank</option><option>C6</option><option>BRB</option><option>Débito/Pix</option><option>Dinheiro</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Valor (R$)</label><input type="number" id="fValor" class="form-input" step="0.01" min="0.01" placeholder="0,00" inputmode="decimal"></div>
+    <button class="btn-salvar" id="btnSalvarLanc">Salvar</button>
+  </div>
+</div>
+
+<!-- MODAL CARTÃO -->
+<div class="modal-back" id="modalCartao">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalCartaoTit">Novo Cartão</div>
+    <div class="form-group"><label class="form-label">Nome do Cartão</label><input type="text" id="cNome" class="form-input" placeholder="Ex: Nubank"></div>
+    <div class="form-group"><label class="form-label">Limite (R$)</label><input type="number" id="cLimite" class="form-input" step="0.01" min="1" placeholder="0,00" inputmode="decimal"></div>
+    <div class="form-group"><label class="form-label">Dia de Fechamento</label><input type="number" id="cDia" class="form-input" min="1" max="31" placeholder="10" inputmode="numeric"></div>
+    <button class="btn-salvar" id="btnSalvarCartao">Salvar Cartão</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Aguarda o HTML carregar completamente antes de rodar qualquer código
+document.addEventListener('DOMContentLoaded', function() {
+
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||'null') }catch{ return null } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(e){ console.error(e) } }
+function loadRec(){ return lsGet('fin_rec') || [] }
+function loadDesp(){ return lsGet('fin_desp') || [] }
+function loadCartoes(){
+  const d = lsGet('fin_cart')
+  if(d && d.length) return d
+  const pad = [{id:1,nome:'Nubank',limite:3000,dia:10},{id:2,nome:'C6',limite:2000,dia:15},{id:3,nome:'BRB',limite:1500,dia:20}]
+  lsSet('fin_cart', pad); return pad
+}
+function saveRec(v){ lsSet('fin_rec',v) }
+function saveDesp(v){ lsSet('fin_desp',v) }
+function saveCart(v){ lsSet('fin_cart',v) }
+function nextId(arr){ return arr.length ? Math.max(...arr.map(x=>x.id))+1 : 1 }
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function ge(id){ return document.getElementById(id) }
+function fmtBRL(v){ return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) }
+function fmtDt(d){ if(!d)return''; const[y,m,day]=d.split('-'); return`${day}/${m}/${y}` }
+function mesDe(d){ return d?d.slice(0,7):'' }
+function nomeMes(m){ if(!m)return''; const[y,mo]=m.split('-'); return['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][+mo-1]+'/'+y }
+function hojeStr(){ const d=new Date(); return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+function hojeYM(){ return hojeStr().slice(0,7) }
+function statusCartao(p){ return p<30?'USAR':p<=70?'MODERADO':'EVITAR' }
+const CORES=['#1a6ef5','#0d9966','#e03040','#7c3aed','#0891b2','#c17d10','#e67c1a','#2563eb','#059669','#6d28d9']
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let ttimer
+function toast(msg, tipo='ok'){
+  const t=ge('toast'); if(!t)return
+  t.textContent=(tipo==='ok'?'✓  ':'')+msg
+  t.className='toast show'+(tipo==='err'?' err':'')
+  clearTimeout(ttimer); ttimer=setTimeout(()=>{ if(t) t.className='toast' },2800)
+}
+
+// ── MÊS ───────────────────────────────────────────────────────────────────────
+let mesSel = hojeYM()
+
+function getMeses(){
+  const s=new Set([hojeYM()])
+  loadRec().forEach(r=>s.add(mesDe(r.data)))
+  loadDesp().forEach(d=>s.add(mesDe(d.data)))
+  return Array.from(s).filter(Boolean).sort((a,b)=>b.localeCompare(a))
+}
+
+function initMesSel(){
+  const el=ge('mesSel'); if(!el) return
+  const meses=getMeses(), atual=el.value||mesSel
+  el.innerHTML=''
+  meses.forEach(m=>{ const o=document.createElement('option'); o.value=m; o.textContent=nomeMes(m); el.appendChild(o) })
+  mesSel = meses.includes(atual) ? atual : meses[0]
+  el.value = mesSel
+}
+
+ge('mesSel').addEventListener('change',()=>{ mesSel=ge('mesSel').value; renderAtivo() })
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────────────────────────
+let paginaAtiva='dashboard'
+const titulosPagina={dashboard:'Dashboard',historico:'Histórico',cartoes:'Cartões',config:'Configurações'}
+
+document.querySelectorAll('.nav-item').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const pg=btn.dataset.page
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'))
+    btn.classList.add('active')
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+    const pgEl=ge('page-'+pg); if(pgEl) pgEl.classList.add('active')
+    const ttEl=ge('topbarTitle'); if(ttEl) ttEl.textContent=titulosPagina[pg]||''
+    const fabEl=ge('fab'); if(fabEl) fabEl.style.display=pg==='config'?'none':'flex'
+    paginaAtiva=pg
+    renderAtivo()
+  })
+})
+
+function renderAtivo(){
+  if(paginaAtiva==='dashboard') renderDash()
+  else if(paginaAtiva==='historico') renderHist()
+  else if(paginaAtiva==='cartoes') renderCartoes()
+  // Sempre atualiza o dashboard em background para manter saldo correto
+  else renderDash()
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDash(){
+  const recs=loadRec().filter(r=>mesDe(r.data)===mesSel)
+  const desps=loadDesp().filter(d=>mesDe(d.data)===mesSel)
+  const cartoes=loadCartoes()
+
+  const totRec=recs.reduce((s,r)=>s+r.valor,0)
+  const totTransf=desps.filter(d=>d.categoria==='Transferência interna').reduce((s,d)=>s+d.valor,0)
+  const totInvest=desps.filter(d=>d.categoria==='Investimentos').reduce((s,d)=>s+d.valor,0)
+  const totDesp=desps.reduce((s,d)=>s+d.valor,0)-totTransf
+  const saldo=totRec-totDesp
+
+  const eS=ge('heroSaldo'); if(eS){ eS.textContent=fmtBRL(saldo); eS.style.color=saldo>=0?'#fff':'#fca5a5' }
+  const eR=ge('heroRec'); if(eR) eR.textContent=fmtBRL(totRec)
+  const eD=ge('heroDesp'); if(eD) eD.textContent=fmtBRL(totDesp)
+
+  const inv=ge('investCard')
+  if(inv){ inv.style.display=totInvest>0?'flex':'none'; const iv=ge('heroInvest'); if(iv) iv.textContent=fmtBRL(totInvest) }
+
+  // Alertas
+  const aw=ge('alertasWrap'); if(!aw) return
+  const lazer=desps.filter(d=>d.categoria==='Lazer').reduce((s,d)=>s+d.valor,0)
+  const alim=desps.filter(d=>d.categoria==='Alimentação').reduce((s,d)=>s+d.valor,0)
+  const alertas=[]
+  if(totRec>0&&lazer>totRec*.15) alertas.push('⚠️ Lazer acima de 15% da receita ('+fmtBRL(lazer)+')')
+  if(totRec>0&&alim>totRec*.30) alertas.push('⚠️ Alimentação acima de 30% da receita ('+fmtBRL(alim)+')')
+  aw.innerHTML=alertas.map(a=>'<div class="alerta-item">'+a+'</div>').join('')
+
+  // Cartões
+  const cd=ge('cartoesDash'); if(!cd) return
+  if(!cartoes.length){ cd.innerHTML='<div class="empty"><div class="empty-icon">💳</div><div class="empty-txt">Nenhum cartão</div></div>' }
+  else {
+    cd.innerHTML=cartoes.map(c=>{
+      const g=desps.filter(d=>d.forma===c.nome).reduce((s,d)=>s+d.valor,0)
+      const p=c.limite>0?Math.round(g/c.limite*100):0
+      const st=statusCartao(p)
+      return '<div class="cartao-chip"><div class="cartao-chip-header"><span class="cartao-chip-nome">'+c.nome+'</span><span class="status-pill s-'+st+'">'+st+'</span></div><div class="cartao-bar-wrap"><div class="cartao-bar-fill b-'+st+'" style="width:'+Math.min(p,100)+'%"></div></div><div class="cartao-chip-vals"><span>Gasto: <strong>'+fmtBRL(g)+'</strong></span><span>Livre: <strong>'+fmtBRL(c.limite-g)+'</strong></span></div></div>'
+    }).join('')
+  }
+
+  // Categorias
+  const cl=ge('catList'); if(!cl) return
+  const porCat={}
+  desps.filter(d=>d.categoria!=='Transferência interna').forEach(d=>{ porCat[d.categoria]=(porCat[d.categoria]||0)+d.valor })
+  const cats=Object.entries(porCat).sort((a,b)=>b[1]-a[1])
+  if(!cats.length){ cl.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-txt">Nenhuma despesa neste mês</div></div>'; return }
+  const mx=cats[0][1]
+  cl.innerHTML=cats.map(([nome,val],i)=>'<div class="cat-item"><div class="cat-dot" style="background:'+CORES[i%CORES.length]+'"></div><span class="cat-nome">'+nome+'</span><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:'+(val/mx*100)+'%;background:'+CORES[i%CORES.length]+'"></div></div><span class="cat-valor">'+fmtBRL(val)+'</span></div>').join('')
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────────────────────────────
+function renderHist(){
+  const catF=ge('filtCat')?ge('filtCat').value:''
+  const formaF=ge('filtForma')?ge('filtForma').value:''
+  let recs=loadRec().filter(r=>mesDe(r.data)===mesSel)
+  let desps=loadDesp().filter(d=>mesDe(d.data)===mesSel)
+  if(catF) desps=desps.filter(d=>d.categoria===catF)
+  if(formaF) desps=desps.filter(d=>d.forma===formaF)
+  const mostrarRec=!catF&&!formaF
+
+  const todas=[
+    ...(mostrarRec?recs:[]).map(r=>({...r,tipo:'receita'})),
+    ...desps.map(d=>({...d,tipo:'despesa'}))
+  ].sort((a,b)=>b.data.localeCompare(a.data))
+
+  const wrap=ge('transWrap'); if(!wrap) return
+  if(!todas.length){ wrap.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nenhuma transação encontrada</div></div>'; return }
+
+  const grupos={}
+  todas.forEach(t=>{ if(!grupos[t.data]) grupos[t.data]=[]; grupos[t.data].push(t) })
+
+  wrap.innerHTML=Object.entries(grupos).sort((a,b)=>b[0].localeCompare(a[0])).map(([data,items])=>{
+    return '<div class="trans-group-label">'+fmtDt(data)+'</div><div class="trans-list">'+
+      items.map(t=>{
+        const isR=t.tipo==='receita'
+        return '<div class="trans-item"><div class="trans-icon '+(isR?'ti-rec':'ti-desp')+'">'+(isR?'↑':'↓')+'</div><div class="trans-info"><div class="trans-desc">'+t.descricao+'</div><div class="trans-meta">'+(isR?'':('<span>'+t.categoria+'</span><span>'+t.forma+'</span>'))+'</div></div><div class="trans-val '+(isR?'tv-rec':'tv-desp')+'">'+(isR?'+':'-')+fmtBRL(t.valor)+'</div><button class="trans-del" onclick="APP.deletar(\''+t.tipo+'\','+t.id+')">✕</button></div>'
+      }).join('')+'</div>'
+  }).join('')
+}
+
+const fcEl=ge('filtCat'); if(fcEl) fcEl.addEventListener('change',renderHist)
+const ffEl=ge('filtForma'); if(ffEl) ffEl.addEventListener('change',renderHist)
+
+// ── CARTÕES ───────────────────────────────────────────────────────────────────
+function renderCartoes(){
+  const cartoes=loadCartoes()
+  const desps=loadDesp().filter(d=>mesDe(d.data)===mesSel)
+  const g=ge('cartoesGrid'); if(!g) return
+  if(!cartoes.length){ g.innerHTML='<div class="empty"><div class="empty-icon">💳</div><div class="empty-txt">Nenhum cartão</div></div>'; return }
+  g.innerHTML=cartoes.map(c=>{
+    const gasto=desps.filter(d=>d.forma===c.nome).reduce((s,d)=>s+d.valor,0)
+    const p=c.limite>0?Math.round(gasto/c.limite*100):0
+    const st=statusCartao(p)
+    return '<div class="cartao-card"><div class="cartao-card-header"><div><div class="cartao-card-nome">💳 '+c.nome+'</div><span class="status-pill s-'+st+'" style="margin-top:6px;display:inline-block">'+st+' — '+p+'% usado</span></div><div class="cartao-card-actions"><button class="btn-icon" onclick="APP.editarCartao('+c.id+')">✏️</button><button class="btn-icon" style="color:var(--red)" onclick="APP.deletarCartao('+c.id+')">🗑</button></div></div><div class="cartao-card-info">Limite: <strong>'+fmtBRL(c.limite)+'</strong></div><div class="cartao-card-info">Gasto este mês: <strong>'+fmtBRL(gasto)+'</strong></div><div class="cartao-card-info">Disponível: <strong>'+fmtBRL(c.limite-gasto)+'</strong></div><div class="cartao-card-info">Fechamento: dia <strong>'+c.dia+'</strong></div></div>'
+  }).join('')
+}
+
+let editCartaoId=null
+
+const bac=ge('btnAddCartao')
+if(bac) bac.addEventListener('click',()=>{
+  editCartaoId=null
+  const t=ge('modalCartaoTit'); if(t) t.textContent='Novo Cartão'
+  ge('cNome').value=''; ge('cLimite').value=''; ge('cDia').value=''
+  ge('modalCartao').classList.add('show')
+})
+
+const bsc=ge('btnSalvarCartao')
+if(bsc) bsc.addEventListener('click',()=>{
+  const nome=(ge('cNome').value||'').trim()
+  const limite=parseFloat(ge('cLimite').value)
+  const dia=parseInt(ge('cDia').value)
+  if(!nome||!limite||!dia){ toast('Preencha todos os campos','err'); return }
+  const arr=loadCartoes()
+  if(editCartaoId!=null){
+    const i=arr.findIndex(c=>c.id===editCartaoId)
+    if(i>=0) arr[i]={...arr[i],nome,limite,dia}
+  } else {
+    arr.push({id:nextId(arr),nome,limite,dia})
+  }
+  saveCart(arr)
+  ge('modalCartao').classList.remove('show')
+  toast(editCartaoId!=null?'Cartão atualizado':'Cartão adicionado')
+  renderCartoes(); renderDash()
+})
+
+// ── MODAL LANÇAMENTO ──────────────────────────────────────────────────────────
+const SUG={
+  'Alimentação':['mercado','supermercado','restaurante','lanche','ifood','rappi','padaria','açougue','pizza','hamburguer','almoço','jantar','café','delivery','comida'],
+  'Transporte':['uber','99','gasolina','combustível','ônibus','metrô','estacionamento','pedágio','pneu','revisão'],
+  'Saúde':['farmácia','remédio','médico','hospital','dentista','exame','plano de saúde','academia','suplemento','artroflan','colágeno'],
+  'Moradia':['aluguel','condomínio','luz','água','gás','internet','telefone','iptu'],
+  'Lazer':['cinema','teatro','show','viagem','hotel','streaming','netflix','spotify','jogo','bar'],
+  'Serviços domésticos':['diarista','faxina','empregada','doméstica','jardineiro','eletricista','encanador'],
+  'Compras pessoais':['roupa','calçado','sapato','tênis','cabelo','barbearia','cosmético','perfume'],
+  'Investimentos':['investimento','tesouro','cdb','lci','fundo','poupança'],
+  'Transferência interna':['transferência','reserva']
+}
+function sugerirCat(desc){
+  const d=(desc||'').toLowerCase()
+  for(const[cat,ws] of Object.entries(SUG)) for(const w of ws) if(d.includes(w)) return cat
+  return null
+}
+
+let tipoLanc='despesa'
+
+const fabEl=ge('fab')
+if(fabEl) fabEl.addEventListener('click',()=>{
+  ge('fData').value=hojeStr()
+  ge('fDesc').value=''; ge('fValor').value=''
+  ge('sugestBadge').style.display='none'
+  setTipo('despesa')
+  ge('modalLanc').classList.add('show')
+  setTimeout(()=>{ const fd=ge('fDesc'); if(fd) fd.focus() },300)
+})
+
+document.querySelectorAll('.tipo-tab').forEach(t=>t.addEventListener('click',()=>setTipo(t.dataset.tipo)))
+
+function setTipo(tipo){
+  tipoLanc=tipo
+  document.querySelectorAll('.tipo-tab').forEach(t=>t.classList.toggle('active',t.dataset.tipo===tipo))
+  const gc=ge('grpCat'); if(gc) gc.style.display=tipo==='despesa'?'':'none'
+  const gf=ge('grpForma'); if(gf) gf.style.display=tipo==='despesa'?'':'none'
+}
+
+let stimer
+const fdEl=ge('fDesc')
+if(fdEl) fdEl.addEventListener('input',()=>{
+  clearTimeout(stimer)
+  stimer=setTimeout(()=>{
+    if(tipoLanc!=='despesa'){ ge('sugestBadge').style.display='none'; return }
+    const s=sugerirCat(ge('fDesc').value)
+    const b=ge('sugestBadge')
+    if(s){ b.textContent='💡 '+s; b.style.display='inline-flex'; b.onclick=()=>{ ge('fCat').value=s; b.style.display='none' } }
+    else b.style.display='none'
+  },400)
+})
+
+const bsl=ge('btnSalvarLanc')
+if(bsl) bsl.addEventListener('click',()=>{
+  const data=ge('fData').value
+  const desc=(ge('fDesc').value||'').trim()
+  const valor=parseFloat(ge('fValor').value)
+  if(!data||!desc||!valor||valor<=0){ toast('Preencha todos os campos','err'); return }
+  if(tipoLanc==='receita'){
+    const arr=loadRec(); arr.push({id:nextId(arr),data,descricao:desc,valor}); saveRec(arr)
+  } else {
+    const arr=loadDesp(); arr.push({id:nextId(arr),data,descricao:desc,categoria:ge('fCat').value,forma:ge('fForma').value,valor}); saveDesp(arr)
+  }
+  ge('modalLanc').classList.remove('show')
+  toast('Lançamento salvo')
+  initMesSel(); renderAtivo()
+})
+
+// fechar modal clicando fora
+[ge('modalLanc'),ge('modalCartao')].forEach(m=>{
+  if(m) m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('show') })
+})
+
+// ── BACKUP ────────────────────────────────────────────────────────────────────
+const beEl=ge('btnExport')
+if(beEl) beEl.addEventListener('click',()=>{
+  const data={receitas:loadRec(),despesas:loadDesp(),cartoes:loadCartoes(),exportado:new Date().toISOString()}
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'})
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='financas_backup_'+hojeStr()+'.json'; a.click()
+  toast('Backup exportado')
+})
+
+const biEl=ge('btnImport')
+if(biEl) biEl.addEventListener('click',()=>{ const f=ge('importFile'); if(f) f.click() })
+
+const ifEl=ge('importFile')
+if(ifEl) ifEl.addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return
+  const r=new FileReader()
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result)
+      if(!d.receitas||!d.despesas) throw new Error()
+      if(!confirm('Importar backup?\nIsso vai substituir todos os dados atuais.')) return
+      saveRec(d.receitas); saveDesp(d.despesas); if(d.cartoes) saveCart(d.cartoes)
+      toast('Backup importado'); initMesSel(); renderAtivo()
+    }catch{ toast('Arquivo inválido','err') }
+  }
+  r.readAsText(f); e.target.value=''
+})
+
+const blEl=ge('btnLimpar')
+if(blEl) blEl.addEventListener('click',()=>{
+  if(!confirm('Apagar TODOS os dados?\nEsta ação não pode ser desfeita.')) return
+  localStorage.removeItem('fin_rec'); localStorage.removeItem('fin_desp'); localStorage.removeItem('fin_cart')
+  toast('Dados apagados'); initMesSel(); renderAtivo()
+})
+
+// ── EXPOR FUNÇÕES GLOBAIS (usadas pelo onclick no HTML gerado dinamicamente) ──
+window.APP = {
+  deletar(tipo, id){
+    if(!confirm('Excluir este lançamento?')) return
+    if(tipo==='receita'){ saveRec(loadRec().filter(r=>r.id!==id)) }
+    else { saveDesp(loadDesp().filter(d=>d.id!==id)) }
+    toast('Lançamento excluído'); initMesSel(); renderAtivo()
+  },
+  editarCartao(id){
+    const c=loadCartoes().find(x=>x.id===id); if(!c) return
+    editCartaoId=id
+    const t=ge('modalCartaoTit'); if(t) t.textContent='Editar Cartão'
+    ge('cNome').value=c.nome; ge('cLimite').value=c.limite; ge('cDia').value=c.dia
+    ge('modalCartao').classList.add('show')
+  },
+  deletarCartao(id){
+    if(!confirm('Excluir este cartão?')) return
+    saveCart(loadCartoes().filter(c=>c.id!==id))
+    toast('Cartão excluído'); renderCartoes(); renderDash()
+  }
+}
+
+// ── RECARREGAR AO VOLTAR PRO APP ─────────────────────────────────────────────
+// No Android, quando o usuário volta pro app após minimizar, recarrega os dados
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible'){
+    initMesSel()
+    renderAtivo()
+  }
+})
+
+// ── INICIAR ───────────────────────────────────────────────────────────────────
+// Garante que tudo carrega corretamente ao abrir ou recarregar
+function iniciar(){
+  initMesSel()
+  renderDash()
+}
+// Tenta de três formas diferentes para garantir compatibilidade com Android
+if(document.readyState === 'complete'){
+  iniciar()
+} else {
+  window.addEventListener('load', iniciar)
+}
+setTimeout(iniciar, 300)
+
+}); // fim DOMContentLoaded
+</script>
+</body>
+</html>
